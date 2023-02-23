@@ -1,0 +1,207 @@
+{% extends 'base.html' %} {% block content %}
+
+<style>
+  .tabs li a {
+    color: rgb(239, 239, 239);
+  }
+  .tabs.is-active {
+    color: #333;
+  }
+  .tab-content {
+    padding: 1rem;
+    display: none;
+  }
+
+  .tab-content.is-active {
+    display: block;
+  }
+
+  #map {
+    min-height: 480px;
+    width: 100%;
+  }
+  @media screen and (max-width: 1605px) {
+    .container {
+      max-width: 80vw !important;
+    }
+  }
+
+  #autoresizing {
+    display: block;
+    overflow: hidden;
+    resize: none;
+  }
+</style>
+<section class="hero is-small" style="background-color: #262d38">
+  <div class="hero-head">
+    <nav class="navbar">
+      <div class="container"></div>
+    </nav>
+  </div>
+
+  <div class="hero-body">
+    <div class="container has-text-centered">
+      <p class="title" style="color: rgb(239, 239, 239)">{{self.title}}</p>
+      <p class="subtitle" style="color: #fff">{{self.event}}</p>
+    </div>
+  </div>
+
+  <div class="hero-foot">
+    <nav class="tabs is-boxed">
+      <div class="container is-justify-content-center">
+        <!-- tabs  -->
+        <div class="tabs is-boxed is-centered">
+          <ul class="is-justify-content-center">
+            <li>
+              <a href="#web_preview">Web Preview</a>
+            </li>
+            <li class="is-active">
+              <a href="#xml_preview">XML Preview</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="tab-content is-active">
+    <div class="container">
+      <div class="columns is-justify-content-center">
+        <div class="column is-6" style="margin: 0 1em">
+          <div class="card">
+            <div id="map" style="border-radius: 0.5rem"></div>
+          </div>
+        </div>
+
+        <div class="column is-6 block" style="margin: 0 1em">
+          <h2>
+            {{self.event}} at {{self.area_desc}} effective on {{self.onset}} to
+            {{self.expires}}
+          </h2>
+          <p>Urgency: {{self.get_urgency_display}}</p>
+          <p>Severity: {{self.get_severity_display}}</p>
+          <p>Certainity: {{self.get_certainty_display}}</p>
+          <p>Audience: {{self.audience}}</p>
+          <h3>Summary Information</h3>
+          <p>{{self.headline}}</p>
+          <p>{{self.description}}</p>
+
+          <p>Contact Information: {{self.contact}}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+    <div class="tab-content ">
+        <div class="container">
+          <div class="field">
+            <div class="control">
+              <textarea class="textarea" disabled id="autoresizing" rows="40">
+    
+                <?xml version="1.0" encoding="UTF-8" ?>
+                <cap:alert xmlns:cap="urn:oasis:names:tc:emergency:cap:1.2">
+                    {% if self.identifier %}<cap:identifier>{{self.identifier}}</cap:identifier>{% endif %}
+                    {% if  self.sender%}<cap:sender>{{self.sender}}</cap:sender>{% endif %}
+                    {% if  self.sent %}<cap:sent>{{self.sent}}</cap:sent>{% endif %}
+                    {% if  self.get_status_display %}<cap:status>{{self.get_status_display}}</cap:status>{% endif %}
+                    {% if  self.get_msgType_display %}<cap:msgType>{{self.get_msgType_display}}</cap:msgType>{% endif %}
+                    {% if  self.get_scope_display %}<cap:scope>{{self.get_scope_display}}</cap:scope>{% endif %}
+                  <cap:info>
+                    {% if  self.get_language_display %}<cap:language>{{self.get_language_display}}</cap:language>{% endif %}
+                    {% if  self.get_category_display %}<cap:category>{{self.get_category_display}}</cap:category>{% endif %}
+                    {% if  self.event %}<cap:event>{{self.event}}</cap:event>{% endif %}
+                    {% if  self.get_urgency_display %}<cap:urgency>{{self.get_urgency_display}}</cap:urgency>{% endif %}
+                    {% if  self.get_severity_display %}<cap:severity>{{self.get_severity_display}}</cap:severity>{% endif %}
+                    {% if  self.get_certainty_display %}<cap:certainty>{{self.get_certainty_display}}</cap:certainty>{% endif %}
+                    {% if  self.effective %}<cap:effective>{{self.effective}}</cap:effective>{% endif %}
+                    {% if  self.onset %}<cap:onset>{{self.onset}}</cap:onset>{% endif %}
+                    {% if  self.expires %}<cap:expires>{{self.expires}}</cap:expires>{% endif %}
+                    <cap:senderName>Organisation</cap:senderName>
+                    {% if  self.headline %}<cap:headline>{{self.headline}}</cap:headline>{% endif %}
+                    {% if  self.description %}<cap:description>{{self.description}}</cap:description>{% endif %}
+                    {% if  self.instruction %}<cap:instruction>{{self.instruction}}</cap:instruction>{% endif %}
+                    <cap:area>
+                      <cap:areaDesc>Musanze Northern Province of Rwanda</cap:areaDesc>
+                      <cap:polygon>-1.63,29.41 -1.63,29.74 -1.38,29.74 -1.38,29.41 -1.63,29.41</cap:polygon>
+                    </cap:area>
+                    
+                  </cap:info>
+                </cap:alert>
+            </textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+  
+</section>
+
+<script>
+  mapboxgl.accessToken =
+    "pk.eyJ1IjoiZ3JhY2VhbW9uZGkiLCJhIjoiY2s4dGphcGQwMDBhcjNmcnkzdGk3MnlrZCJ9.54r40Umo0l3dHseEbrQpUg";
+
+  const map = new mapboxgl.Map({
+    container: "map", // container ID
+    // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
+    style: "mapbox://styles/mapbox/light-v10", // style URL
+    center: [30.30252782218591, 15.302857659429051], // starting position [lng, lat]
+    zoom: 4.2, // starting zoom
+    scrollZoom: false,
+  });
+
+  textarea = document.querySelector("#autoresizing");
+  textarea.addEventListener("input", autoResize, false);
+
+  function autoResize() {
+    this.style.height = "auto";
+    this.style.height = this.scrollHeight + "px";
+  }
+
+  let tabsWithContent = (function () {
+    let tabs = document.querySelectorAll(".tabs li");
+    let tabsContent = document.querySelectorAll(".tab-content");
+
+    let deactvateAllTabs = function () {
+      tabs.forEach(function (tab) {
+        tab.classList.remove("is-active");
+      });
+    };
+
+    let hideTabsContent = function () {
+      tabsContent.forEach(function (tabContent) {
+        tabContent.classList.remove("is-active");
+      });
+    };
+
+    let activateTabsContent = function (tab) {
+      tabsContent[getIndex(tab)].classList.add("is-active");
+    };
+
+    let getIndex = function (el) {
+      return [...el.parentElement.children].indexOf(el);
+    };
+
+    tabs.forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        deactvateAllTabs();
+        hideTabsContent();
+        tab.classList.add("is-active");
+        activateTabsContent(tab);
+      });
+    });
+
+    tabs[0].click();
+  })();
+
+  $('document').ready(function()
+{
+    $('textarea').each(function(){
+            $(this).val($(this).val().trim());
+        }
+    );
+});
+</script>
+
+{% endblock content %}

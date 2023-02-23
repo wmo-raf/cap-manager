@@ -1,0 +1,23 @@
+{% comment %} {% extends "django/forms/widgets/hidden.html" %}
+{% block after_field %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+        integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+        crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+    integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+    crossorigin=""></script>
+    <div id="{{ map_id }}" style="height: 400px;"></div>
+    
+    <script>
+        console.log("hello world")
+        var map = L.map('{{ map_id }}').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        console.log(polygons)
+        var polygons = {{ polygons }};
+        L.geoJSON(polygons).addTo(map); 
+    </script>
+    
+{% endblock %} {% endcomment %}
