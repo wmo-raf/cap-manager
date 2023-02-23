@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "django.contrib.gis",
+    "rest_framework",
+    'rest_framework_xml',
     "leaflet",
     'capeditor',
     # 'condensedinlinepanel'
@@ -71,6 +73,13 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'capmanager.urls'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework_xml.renderers.XMLRenderer',  # add XMLRenderer
+    ),
+}
 
 TEMPLATES = [
     {

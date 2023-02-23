@@ -183,12 +183,13 @@ class Alert(Page):
             
             FieldPanel('status',),
             FieldPanel('message_type', classname="message"),
+            InlinePanel('references', heading="Earlier Reference Alerts -  If applicable", label="Alert", classname="references"),
+
             FieldPanel('note', classname='note'),
 
             FieldPanel('scope'),
             FieldPanel('restriction',classname="restriction" ),
             InlinePanel('addresses', heading="Intended Recipients (If scope is Private) ", label="Recipient", classname="addresses"),
-            InlinePanel('references', heading="Earlier Reference Alerts -  If applicable", label="Alert", classname="references"),
 
 
         ], heading="Alert Identification (Sender, Message Type, Scope)", classname="collapsed"),

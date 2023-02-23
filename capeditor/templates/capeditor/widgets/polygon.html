@@ -55,7 +55,16 @@
         // add draw control
         var drawControl = new L.Control.Draw({
           edit: {
-            featureGroup: drawnItems
+            featureGroup: drawnItems,
+            edit: true,
+            poly:{
+              allowIntersection: false,
+              
+            drawError: {
+                color: 'red', // Color the shape will turn when intersects
+                message: '<strong>Shape egdes cannot cross!' // Message that will show when intersect
+            }
+          }
           },
           draw: {
             polyline: false,
@@ -63,6 +72,14 @@
             circle: false,
             circlemarker: false,
             rectangle: true,
+            polygon:{
+              allowIntersection: false,
+            drawError: {
+                color: 'red', // Color the shape will turn when intersects
+                message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+            },
+            
+            }
           }
         });
   
@@ -97,18 +114,46 @@
         };
   
         map.on('draw:created', function(e) {
-          drawnItems.addLayer(e.layer);
+
+          var isIntersecting = false;
+
+          drawnItems.eachLayer(function(existingLayer) {
+              if (e.layer !== existingLayer && e.layer.intersects(existingLayer)) {
+                  drawnItems.removeLayer(e.layer);
+                  isIntersecting = true;
+                  return;
+              }
+          });
+
+          if (!isIntersecting) {
+            drawnItems.addLayer(e.layer);
           
-         $polyfield.val(JSON.stringify(e.layer.toGeoJSON().geometry));
-          $geom.val(JSON.stringify(e.layer.toGeoJSON()));
+            $polyfield.val(JSON.stringify(e.layer.toGeoJSON().geometry));
+             $geom.val(JSON.stringify(e.layer.toGeoJSON()));
+          }
+
+         
         });
 
         map.on('draw:edited', function(e) {
           e.layers.eachLayer(function (layer) {
 
-          $polyfield.val(JSON.stringify(layer.toGeoJSON().geometry));
-          $geom.val(JSON.stringify(layer.toGeoJSON()));
+            var isIntersecting = false;
 
+            drawnItems.eachLayer(function(existingLayer) {
+                if (layer !== existingLayer && layer.intersects(existingLayer)) {
+                    drawnItems.removeLayer(layer);
+                    isIntersecting = true;
+                    return;
+                }
+            });
+
+            if (!isIntersecting) {
+              layer.setStyle({color: 'blue'});
+
+              $polyfield.val(JSON.stringify(layer.toGeoJSON().geometry));
+              $geom.val(JSON.stringify(layer.toGeoJSON()));
+            }
           });
           
         });
