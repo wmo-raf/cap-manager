@@ -28,15 +28,6 @@ class BasemapPolygonWidget(forms.HiddenInput):
         context = super().get_context(name, value, attrs)
         context['map_id'] = f'map-{name}'
         
-        # if value:
-
-        #     g1 = shapely.wkt.loads(value.ewkt.split(';')[1])
-
-        #     g2 = geojson.Feature(geometry=g1, properties={})
-        #     print("Vaaaaaalllluuuuu",json.dumps(g2.geometry.coordinates[0]))
-
-        #     context['polygons'] = json.dumps(g2.geometry.coordinates[0]) if value else json.dumps([])
-        #     return context
 
         return context
 

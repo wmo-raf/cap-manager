@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} {% block extra_css %} {{ block.super }}
 
 <style>
   .tabs li a {
@@ -32,6 +32,8 @@
     resize: none;
   }
 </style>
+{% endblock %} {% block content %}
+
 <section class="hero is-small" style="background-color: #262d38">
   <div class="hero-head">
     <nav class="navbar">
@@ -40,9 +42,16 @@
   </div>
 
   <div class="hero-body">
-    <div class="container has-text-centered">
-      <p class="title" style="color: rgb(239, 239, 239)">{{self.title}}</p>
-      <p class="subtitle" style="color: #fff">{{self.event}}</p>
+    <div class="container has-text-centered" style="width: 30vw">
+      <p class="title" style="color: rgb(239, 239, 239); font-size: 28px">
+        {{self.title}}
+      </p>
+      {% comment %}
+      <p class="subtitle" style="color: #fff">{{self.get_severity_display}}</p>
+      {% endcomment %} {% for alert_area in self.alert_areas.values%}
+      <span class="tag is-light">{{alert_area.area_desc}}</span>
+
+      {% endfor %}
     </div>
   </div>
 
@@ -65,6 +74,17 @@
   </div>
 </section>
 
+{% for alert_area in self.alert_areas.values%}
+<input
+  name="alert-area"
+  class="alert-area"
+  id="area-{{ alert_area.id }}"
+  type="hidden"
+  value="{{alert_area.area_desc}}~{{ alert_area.area }}"
+/>
+
+{% endfor %}
+
 <section class="py-4">
   <div class="tab-content is-active">
     <div class="container">
@@ -76,28 +96,81 @@
         </div>
 
         <div class="column is-6 block" style="margin: 0 1em">
-          <h2>
-            {{self.event}} at {{self.area_desc}} effective on {{self.onset}} to
-            {{self.expires}}
+          <h2 class="title" style="font-size: 23px">
+            {% if self.event %}{{self.event}} event{% endif %} 
+            {% if self.area%} at {% for alert_area in self.alert_areas.values%}
+            {{alert_area.area_desc}}, {% endfor %}{% endif %} 
+            {% if self.onset %}effective on {{self.onset}}{% endif %} {% if self.expires %}to
+            {{self.expires}}{% endif %}
           </h2>
-          <p>Urgency: {{self.get_urgency_display}}</p>
-          <p>Severity: {{self.get_severity_display}}</p>
-          <p>Certainity: {{self.get_certainty_display}}</p>
-          <p>Audience: {{self.audience}}</p>
-          <h3>Summary Information</h3>
-          <p>{{self.headline}}</p>
+
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>Urgency</th>
+                <td>{{self.get_urgency_display}}</td>
+              </tr>
+
+              <tr>
+                <th>Severity</th>
+
+
+                {% if self.severity == 'extreme'  %}
+                <td><span class="tag is-medium" style="background-color:#d72f2a;opacity:0.8; color:#000 " >{{self.get_severity_display}}</span></td>
+
+                {% elif self.severity == 'severe'%}
+                <td><span class="tag is-medium" style="background-color:#f89904;opacity:0.8; color:#000" >{{self.get_severity_display}}</span></td>
+
+                {% elif self.severity == 'moderate'%}
+                <td><span class="tag is-medium" style="background-color:#e4e616;opacity:0.8; color:#000" >{{self.get_severity_display}}</span></td>
+
+                {% elif self.severity == 'minor'%}
+                <td><span class="tag is-medium" style="background-color:#53ffff;opacity:0.8; color:#000" >{{self.get_severity_display}}</span></td>
+
+                {% elif self.severity == 'unknown'%}
+                <td><span class="tag is-medium" style="background-color:#3366ff;opacity:0.8; color:#000" >{{self.get_severity_display}}</span></td>
+
+                
+                {% endif %}
+                
+
+              </tr>
+
+              <tr>
+                <th>Certainity</th>
+                <td>{{self.get_certainty_display}}</td>
+              </tr>
+
+              <tr>
+                <th>Audience</th>
+                <td>{{self.audience}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <hr />
+          <h3 class="title" style="font-size: 20px">Summary Information</h3>
+
+          <strong>{{self.headline}}</strong>
           <p>{{self.description}}</p>
 
-          <p>Contact Information: {{self.contact}}</p>
+          <hr />
+          <table class="table">
+            <tbody>
+              <tr>
+                <th>Contact Information</th>
+                <td>{{self.contact}}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
   </div>
-    <div class="tab-content ">
-        <div class="container">
-          <div class="field">
-            <div class="control">
-              <textarea class="textarea" disabled id="autoresizing" rows="40">
+  <div class="tab-content">
+    <div class="container">
+      <div class="field">
+        <div class="control">
+          <textarea class="textarea" disabled id="autoresizing" rows="40">
     
                 <?xml version="1.0" encoding="UTF-8" ?>
                 <cap:alert xmlns:cap="urn:oasis:names:tc:emergency:cap:1.2">
@@ -128,15 +201,16 @@
                     
                   </cap:info>
                 </cap:alert>
-            </textarea>
-            </div>
-          </div>
+            </textarea
+          >
         </div>
       </div>
-
-
-  
+    </div>
+  </div>
 </section>
+{% endblock content %} {% block extra_js %} {{ block.super }}
+
+<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 
 <script>
   mapboxgl.accessToken =
@@ -146,10 +220,117 @@
     container: "map", // container ID
     // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
     style: "mapbox://styles/mapbox/light-v10", // style URL
-    center: [30.30252782218591, 15.302857659429051], // starting position [lng, lat]
+    center: [30.019531249998607, 16.130262012034265], // starting position [lng, lat]
     zoom: 4.2, // starting zoom
     scrollZoom: false,
   });
+
+  var allAreas = $(".alert-area")
+    .map(function () {
+      return this.value;
+    })
+    .get();
+
+  if (allAreas.length > 0) {
+    var polyFeature = [];
+    allAreas.map((area) => {
+      // Remove the SRID prefix
+      const wktWithoutSrid = area.split("~")[1].replace(/^SRID=\d+;/, "");
+
+      // Extract the coordinates from the polygon string using a regex pattern
+      const match = /\((.*?)\)/.exec(wktWithoutSrid);
+
+      revCoords = [];
+
+      if (match) {
+        const coordinatePairs = match[1].split(", ");
+        const coordinates = coordinatePairs.map((pair) =>
+          pair.replace("(", "").split(" ").map(parseFloat)
+        );
+
+        polyFeature.push({
+          type: "Feature",
+          geometry: {
+            type: "Polygon",
+            coordinates: [coordinates],
+          },
+          properties: {
+            areaDesc: area.split("~")[0],
+            severity: "{{self.severity}}",
+          },
+        });
+      }
+    });
+
+    console.log(polyFeature);
+
+    map.on("load", () => {
+      map.addSource("alert-areas", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: polyFeature,
+        },
+      });
+
+      map.addLayer({
+        id: "alert-areas-layer",
+        type: "fill",
+        source: "alert-areas",
+        paint: {
+          "fill-color": "#088",
+          "fill-opacity": 0.8,
+          "fill-color": [
+            "case",
+            ["==", ["get", "severity"], "extreme"],
+            "#d72f2a",
+            ["==", ["get", "severity"], "severe"],
+            "#f89904",
+            ["==", ["get", "severity"], "moderate"],
+            "#e4e616",
+            ["==", ["get", "severity"], "minor"],
+            "#53ffff",
+            ["==", ["get", "severity"], "unknown"],
+            "#3366ff",
+            "black",
+          ],
+          "fill-opacity": 0.8,
+        },
+      });
+      var sourceBounds = new mapboxgl.LngLatBounds();
+      map.getSource("alert-areas")._data.features.forEach(function (feature) {
+        sourceBounds.extend(feature.geometry.coordinates[0]);
+      });
+
+      var bounds = turf.bbox({
+        type: "FeatureCollection",
+        features: polyFeature,
+      });
+      map.fitBounds(bounds, { padding: 20 });
+
+      // When a click event occurs on a feature in the places layer, open a popup at the
+      // location of the feature, with description HTML from its properties.
+      map.on("click", "alert-areas-layer", (e) => {
+        // Copy coordinates array.
+        const description = e.features[0].properties.areaDesc;
+
+        new mapboxgl.Popup()
+          .setLngLat(e.lngLat)
+          .setHTML(`<h2>${description}</h2>`)
+          .addTo(map);
+      });
+
+      // Change the cursor to a pointer when the mouse is over the places layer.
+      map.on("mouseenter", "alert-areas-layer", () => {
+        map.getCanvas().style.cursor = "pointer";
+      });
+
+      // Change it back to a pointer when it leaves.
+      map.on("mouseleave", "alert-areas-layer", () => {
+        map.getCanvas().style.cursor = "";
+      });
+    });
+  }
 
   textarea = document.querySelector("#autoresizing");
   textarea.addEventListener("input", autoResize, false);
@@ -195,13 +376,11 @@
     tabs[0].click();
   })();
 
-  $('document').ready(function()
-{
-    $('textarea').each(function(){
-            $(this).val($(this).val().trim());
-        }
-    );
-});
+  $("document").ready(function () {
+    $("textarea").each(function () {
+      $(this).val($(this).val().trim());
+    });
+  });
 </script>
 
-{% endblock content %}
+{% endblock %}

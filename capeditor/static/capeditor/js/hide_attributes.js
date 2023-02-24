@@ -1,5 +1,4 @@
 window.addEventListener('DOMContentLoaded', (event) => {
-
     $('.restriction').hide()
     $('.addresses').hide()
     $('.note').hide()
@@ -7,7 +6,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
     $('#id_scope').on('change', function(e) {
         var optionSelected =  $("option:selected", this)
         var valueSelected  = optionSelected.val();
-       
        
         if(valueSelected === 'restricted'){
             $('.restriction').show()

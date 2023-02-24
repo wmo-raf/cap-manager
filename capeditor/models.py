@@ -5,6 +5,7 @@ from wagtail.core.models import Page
 from wagtail.core.models import Orderable
 from modelcluster.fields import ParentalKey
 # from Inlinepanel.edit_handlers import InlinePanel
+from django.utils.text import slugify
 
 from wagtail.admin.edit_handlers import MultiFieldPanel, FieldPanel, InlinePanel,FieldRowPanel
 from .widgets import  BasemapPolygonWidget
@@ -210,8 +211,9 @@ class Alert(Page):
             FieldRowPanel([
                 FieldPanel('effective'),
                 FieldPanel('onset'),
-                FieldPanel('expires'),
             ]),
+            FieldPanel('expires'),
+
             
         ], heading="Alert Categorization (Category, Urgency, Severity, Certainity, Response & Dates)", classname="collapsed"),
 
@@ -228,7 +230,7 @@ class Alert(Page):
 
         MultiFieldPanel([
             InlinePanel('alert_areas', label="Alert Area"),
-        ], heading="Alert Areas", ),
+        ], heading="Alert Areas", classname="collapsed"),
         
 
     #     InlinePanel('incidents', heading="Related Incidents -  If applicable", label="Incident"),
@@ -250,18 +252,12 @@ class Alert(Page):
         'wagtailcore.Page'  # appname.ModelName
     ]
 
-    @cached_property
-    def point(self):
-        return geosgeometry_str_to_struct(self.location)
+    # def clean(self):
+    #     super().clean()
+    #     new_title = f'{self.event} - {self.sent}'
+    #     self.title = new_title
+    #     self.slug = slugify(new_title)
 
-    @property
-    def lat(self):
-        return self.point['y']
-
-    @property
-    def lng(self):
-        return self.point['x']
-  
 
 class AlertAddress(Orderable):
     alert = ParentalKey('Alert', related_name="addresses")
@@ -360,23 +356,6 @@ class AlertArea(Orderable):
         FieldPanel('area_desc'),
         FieldPanel('area', widget=BasemapPolygonWidget() ),
     ]   
-
-    
-
-                     
-                    
-# class AlertPolygon(models.Model):
-#     alert = models.ForeignKey('Alert', related_name='polygons')
-#     label = models.CharField(max_length=100, help_text="Label for the polygon")
-#     polygon = models.TextField(help_text="The paired values of points defining a polygon that delineates the affected "
-#                                          "area of the alert message")
-
-
-# class AlertCircle(models.Model):
-#     alert = ParentalKey('Alert', related_name='circles')
-#     label = models.CharField(max_length=100, help_text="Label for the circle")
-#     circle = models.TextField(help_text="The paired values of a point and radius delineating the affected "
-#                                         "area of the alert message")
 
 
 class AlertGeocode(models.Model):
