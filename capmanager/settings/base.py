@@ -76,8 +76,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
+        # 'capeditor.renderers.CustomXMLRenderer',
         'rest_framework.renderers.JSONRenderer',
         'rest_framework_xml.renderers.XMLRenderer',  # add XMLRenderer
+        # 'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
+    'DEFAULT_PARSER_CLASSES': (
+        'rest_framework_xml.parsers.XMLParser',
     ),
 }
 
@@ -201,7 +206,4 @@ WAGTAILSEARCH_BACKENDS = {
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 WAGTAILADMIN_BASE_URL = "http://example.com"
 
-
-GEO_WIDGET_DEFAULT_LOCATION = {"lat": 16.661813721505254, "lng": 31.244020618757236}
-
-GEO_WIDGET_ZOOM = 5
+WAGTAIL_ENABLE_UPDATE_PREVIEW_ON_EDIT = True

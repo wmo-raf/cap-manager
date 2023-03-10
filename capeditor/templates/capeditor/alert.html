@@ -1,4 +1,11 @@
 {% extends 'base.html' %} {% block extra_css %} {{ block.super }}
+{% load wagtailcore_tags %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma-divider@2.0.1/dist/css/bulma-divider.min.css">
+
+<link href="https://cdn.maptiler.com/maplibre-gl-js/v2.4.0/maplibre-gl.css" rel="stylesheet" />
+
 
 <style>
   .tabs li a {
@@ -42,18 +49,20 @@
   </div>
 
   <div class="hero-body">
-    <div class="container has-text-centered" style="width: 30vw">
+    <div class="container has-text-centered" style="width: 40vw">
       <p class="title" style="color: rgb(239, 239, 239); font-size: 28px">
-        {{self.title}}
+        {{page.title}}
       </p>
       {% comment %}
-      <p class="subtitle" style="color: #fff">{{self.get_severity_display}}</p>
-      {% endcomment %} {% for alert_area in self.alert_areas.values%}
+      <p class="subtitle" style="color: #fff">{{page.get_severity_display}}</p>
+      {% endcomment %} {% for alert_area in page.alert_areas.values%}
       <span class="tag is-light">{{alert_area.area_desc}}</span>
 
       {% endfor %}
     </div>
   </div>
+
+  {% if request.is_preview %}
 
   <div class="hero-foot">
     <nav class="tabs is-boxed">
@@ -61,27 +70,34 @@
         <!-- tabs  -->
         <div class="tabs is-boxed is-centered">
           <ul class="is-justify-content-center">
-            <li>
-              <a href="#web_preview">Web Preview</a>
-            </li>
             <li class="is-active">
-              <a href="#xml_preview">XML Preview</a>
+              <a>Web Preview</a>
+            </li>
+            <li>
+              <a>XML Preview</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
   </div>
+
+  {% endif %}
 </section>
 
-{% for alert_area in self.alert_areas.values%}
+{% for info in page.alert_info.all %}
+
+{% for alert_area in info.alert_areas.values%}
 <input
   name="alert-area"
   class="alert-area"
   id="area-{{ alert_area.id }}"
   type="hidden"
-  value="{{alert_area.area_desc}}~{{ alert_area.area }}"
+  value='{"severity":"{{info.severity}}","areaDesc":"{{alert_area.area_desc}}","area":"{{ alert_area.area }}"}'
+
 />
+
+{% endfor %}
 
 {% endfor %}
 
@@ -96,39 +112,42 @@
         </div>
 
         <div class="column is-6 block" style="margin: 0 1em">
-          <h2 class="title" style="font-size: 23px">
-            {% if self.event %}{{self.event}} event{% endif %} 
-            {% if self.area%} at {% for alert_area in self.alert_areas.values%}
+
+          {% for info in page.alert_info.all %}
+
+          <h2 class="title" style="font-size: 20px">
+            {% if info.event %}{{info.event}} event{% endif %} 
+            {% if info.area%} at {% for alert_area in info.alert_areas.values%}
             {{alert_area.area_desc}}, {% endfor %}{% endif %} 
-            {% if self.onset %}effective on {{self.onset}}{% endif %} {% if self.expires %}to
-            {{self.expires}}{% endif %}
+            {% if info.onset %}effective on {{info.onset}}{% endif %} {% if info.expires %} and expires on
+            {{info.expires}}{% endif %}
           </h2>
 
           <table class="table">
             <tbody>
               <tr>
                 <th>Urgency</th>
-                <td>{{self.get_urgency_display}}</td>
+                <td>{{info.get_urgency_display}}</td>
               </tr>
 
               <tr>
                 <th>Severity</th>
 
 
-                {% if self.severity == 'extreme'  %}
-                <td><span class="tag is-medium" style="background-color:#d72f2a;opacity:0.8; color:#000 " >{{self.get_severity_display}}</span></td>
+                {% if info.severity == 'Extreme'  %}
+                <td><span class="tag is-medium" style="background-color:#d72f2a;opacity:0.8; color:#000 " >{{info.get_severity_display}}</span></td>
 
-                {% elif self.severity == 'severe'%}
-                <td><span class="tag is-medium" style="background-color:#f89904;opacity:0.8; color:#000" >{{self.get_severity_display}}</span></td>
+                {% elif info.severity == 'Severe'%}
+                <td><span class="tag is-medium" style="background-color:#f89904;opacity:0.8; color:#000" >{{info.get_severity_display}}</span></td>
 
-                {% elif self.severity == 'moderate'%}
-                <td><span class="tag is-medium" style="background-color:#e4e616;opacity:0.8; color:#000" >{{self.get_severity_display}}</span></td>
+                {% elif info.severity == 'Moderate'%}
+                <td><span class="tag is-medium" style="background-color:#e4e616;opacity:0.8; color:#000" >{{info.get_severity_display}}</span></td>
 
-                {% elif self.severity == 'minor'%}
-                <td><span class="tag is-medium" style="background-color:#53ffff;opacity:0.8; color:#000" >{{self.get_severity_display}}</span></td>
+                {% elif info.severity == 'Minor'%}
+                <td><span class="tag is-medium" style="background-color:#53ffff;opacity:0.8; color:#000" >{{info.get_severity_display}}</span></td>
 
-                {% elif self.severity == 'unknown'%}
-                <td><span class="tag is-medium" style="background-color:#3366ff;opacity:0.8; color:#000" >{{self.get_severity_display}}</span></td>
+                {% elif info.severity == 'Unknown'%}
+                <td><span class="tag is-medium" style="background-color:#3366ff;opacity:0.8; color:#000" >{{info.get_severity_display}}</span></td>
 
                 
                 {% endif %}
@@ -138,30 +157,47 @@
 
               <tr>
                 <th>Certainity</th>
-                <td>{{self.get_certainty_display}}</td>
+                <td>{{info.get_certainty_display}}</td>
               </tr>
 
+              {% if info.audience %}
               <tr>
                 <th>Audience</th>
-                <td>{{self.audience}}</td>
+                <td>{{info.audience}}</td>
               </tr>
-            </tbody>
-          </table>
-          <hr />
-          <h3 class="title" style="font-size: 20px">Summary Information</h3>
+              {% endif %}
+              
+              {% if info.instruction %}
+              <tr>
+                <th>Instructions</th>
+                <td>{{info.instruction|richtext}}</td>
+              </tr>
+              {% endif %}
 
-          <strong>{{self.headline}}</strong>
-          <p>{{self.description}}</p>
+              {% if info.contact %}
 
-          <hr />
-          <table class="table">
-            <tbody>
               <tr>
                 <th>Contact Information</th>
-                <td>{{self.contact}}</td>
+                <td>{{info.contact}}</td>
               </tr>
+
+              {% endif %}
             </tbody>
           </table>
+          <hr />
+
+          {% if info.headline or info.description %}
+          {% comment %} <h3 class="title" style="font-size: 20px">Summary Information</h3> {% endcomment %}
+
+          <strong>{{info.headline}}</strong>
+          <p>{{info.description|richtext}}</p>
+
+          {% endif %}
+         
+          <hr>
+          {% endfor %}
+
+         
         </div>
       </div>
     </div>
@@ -174,26 +210,26 @@
     
                 <?xml version="1.0" encoding="UTF-8" ?>
                 <cap:alert xmlns:cap="urn:oasis:names:tc:emergency:cap:1.2">
-                    {% if self.identifier %}<cap:identifier>{{self.identifier}}</cap:identifier>{% endif %}
-                    {% if  self.sender%}<cap:sender>{{self.sender}}</cap:sender>{% endif %}
-                    {% if  self.sent %}<cap:sent>{{self.sent}}</cap:sent>{% endif %}
-                    {% if  self.get_status_display %}<cap:status>{{self.get_status_display}}</cap:status>{% endif %}
-                    {% if  self.get_msgType_display %}<cap:msgType>{{self.get_msgType_display}}</cap:msgType>{% endif %}
-                    {% if  self.get_scope_display %}<cap:scope>{{self.get_scope_display}}</cap:scope>{% endif %}
+                    {% if page.identifier %}<cap:identifier>{{page.identifier}}</cap:identifier>{% endif %}
+                    {% if  page.sender%}<cap:sender>{{page.sender}}</cap:sender>{% endif %}
+                    {% if  page.sent %}<cap:sent>{{page.sent}}</cap:sent>{% endif %}
+                    {% if  page.get_status_display %}<cap:status>{{page.get_status_display}}</cap:status>{% endif %}
+                    {% if  page.get_msgType_display %}<cap:msgType>{{page.get_msgType_display}}</cap:msgType>{% endif %}
+                    {% if  page.get_scope_display %}<cap:scope>{{page.get_scope_display}}</cap:scope>{% endif %}
                   <cap:info>
-                    {% if  self.get_language_display %}<cap:language>{{self.get_language_display}}</cap:language>{% endif %}
-                    {% if  self.get_category_display %}<cap:category>{{self.get_category_display}}</cap:category>{% endif %}
-                    {% if  self.event %}<cap:event>{{self.event}}</cap:event>{% endif %}
-                    {% if  self.get_urgency_display %}<cap:urgency>{{self.get_urgency_display}}</cap:urgency>{% endif %}
-                    {% if  self.get_severity_display %}<cap:severity>{{self.get_severity_display}}</cap:severity>{% endif %}
-                    {% if  self.get_certainty_display %}<cap:certainty>{{self.get_certainty_display}}</cap:certainty>{% endif %}
-                    {% if  self.effective %}<cap:effective>{{self.effective}}</cap:effective>{% endif %}
-                    {% if  self.onset %}<cap:onset>{{self.onset}}</cap:onset>{% endif %}
-                    {% if  self.expires %}<cap:expires>{{self.expires}}</cap:expires>{% endif %}
+                    {% if  page.get_language_display %}<cap:language>{{page.get_language_display}}</cap:language>{% endif %}
+                    {% if  page.get_category_display %}<cap:category>{{page.get_category_display}}</cap:category>{% endif %}
+                    {% if  page.event %}<cap:event>{{page.event}}</cap:event>{% endif %}
+                    {% if  page.get_urgency_display %}<cap:urgency>{{page.get_urgency_display}}</cap:urgency>{% endif %}
+                    {% if  page.get_severity_display %}<cap:severity>{{page.get_severity_display}}</cap:severity>{% endif %}
+                    {% if  page.get_certainty_display %}<cap:certainty>{{page.get_certainty_display}}</cap:certainty>{% endif %}
+                    {% if  page.effective %}<cap:effective>{{page.effective}}</cap:effective>{% endif %}
+                    {% if  page.onset %}<cap:onset>{{page.onset}}</cap:onset>{% endif %}
+                    {% if  page.expires %}<cap:expires>{{page.expires}}</cap:expires>{% endif %}
                     <cap:senderName>Organisation</cap:senderName>
-                    {% if  self.headline %}<cap:headline>{{self.headline}}</cap:headline>{% endif %}
-                    {% if  self.description %}<cap:description>{{self.description}}</cap:description>{% endif %}
-                    {% if  self.instruction %}<cap:instruction>{{self.instruction}}</cap:instruction>{% endif %}
+                    {% if  page.headline %}<cap:headline>{{page.headline}}</cap:headline>{% endif %}
+                    {% if  page.description %}<cap:description>{{page.description}}</cap:description>{% endif %}
+                    {% if  page.instruction %}<cap:instruction>{{page.instruction}}</cap:instruction>{% endif %}
                     <cap:area>
                       <cap:areaDesc>Musanze Northern Province of Rwanda</cap:areaDesc>
                       <cap:polygon>-1.63,29.41 -1.63,29.74 -1.38,29.74 -1.38,29.41 -1.63,29.41</cap:polygon>
@@ -209,17 +245,17 @@
   </div>
 </section>
 {% endblock content %} {% block extra_js %} {{ block.super }}
+<script src="https://code.jquery.com/jquery-3.6.3.min.js"
+integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
 
+  <script src="https://cdn.maptiler.com/maplibre-gl-js/v2.4.0/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
 
 <script>
-  mapboxgl.accessToken =
-    "pk.eyJ1IjoiZ3JhY2VhbW9uZGkiLCJhIjoiY2s4dGphcGQwMDBhcjNmcnkzdGk3MnlrZCJ9.54r40Umo0l3dHseEbrQpUg";
-
-  const map = new mapboxgl.Map({
+  
+  const map = new maplibregl.Map({
     container: "map", // container ID
-    // Choose from Mapbox's core styles, or make your own style with Mapbox Studio
-    style: "mapbox://styles/mapbox/light-v10", // style URL
+    style: "https://api.maptiler.com/maps/basic-v2/style.json?key=uYCBTRo5fyHCkPvoa5Io", // style URL
     center: [30.019531249998607, 16.130262012034265], // starting position [lng, lat]
     zoom: 4.2, // starting zoom
     scrollZoom: false,
@@ -227,7 +263,7 @@
 
   var allAreas = $(".alert-area")
     .map(function () {
-      return this.value;
+      return JSON.parse(this.value);
     })
     .get();
 
@@ -235,7 +271,7 @@
     var polyFeature = [];
     allAreas.map((area) => {
       // Remove the SRID prefix
-      const wktWithoutSrid = area.split("~")[1].replace(/^SRID=\d+;/, "");
+      const wktWithoutSrid = area.area.replace(/^SRID=\d+;/, "");
 
       // Extract the coordinates from the polygon string using a regex pattern
       const match = /\((.*?)\)/.exec(wktWithoutSrid);
@@ -255,8 +291,8 @@
             coordinates: [coordinates],
           },
           properties: {
-            areaDesc: area.split("~")[0],
-            severity: "{{self.severity}}",
+            areaDesc: area.areaDesc,
+            severity: area.severity,
           },
         });
       }
@@ -282,22 +318,22 @@
           "fill-opacity": 0.8,
           "fill-color": [
             "case",
-            ["==", ["get", "severity"], "extreme"],
+            ["==", ["get", "severity"], "Extreme"],
             "#d72f2a",
-            ["==", ["get", "severity"], "severe"],
+            ["==", ["get", "severity"], "Severe"],
             "#f89904",
-            ["==", ["get", "severity"], "moderate"],
+            ["==", ["get", "severity"], "Moderate"],
             "#e4e616",
-            ["==", ["get", "severity"], "minor"],
+            ["==", ["get", "severity"], "Minor"],
             "#53ffff",
-            ["==", ["get", "severity"], "unknown"],
+            ["==", ["get", "severity"], "Unknown"],
             "#3366ff",
             "black",
           ],
           "fill-opacity": 0.8,
         },
       });
-      var sourceBounds = new mapboxgl.LngLatBounds();
+      var sourceBounds = new maplibregl.LngLatBounds();
       map.getSource("alert-areas")._data.features.forEach(function (feature) {
         sourceBounds.extend(feature.geometry.coordinates[0]);
       });
@@ -314,7 +350,7 @@
         // Copy coordinates array.
         const description = e.features[0].properties.areaDesc;
 
-        new mapboxgl.Popup()
+        new maplibregl.Popup()
           .setLngLat(e.lngLat)
           .setHTML(`<h2>${description}</h2>`)
           .addTo(map);

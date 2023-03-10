@@ -4,6 +4,7 @@
 <html class="no-js" lang="en">
     <head>
         <meta charset="utf-8" />
+        
         <title>
             {% block title %}
                 {% if self.seo_title %}{{ self.seo_title }}{% else %}{{ self.title }}{% endif %}
@@ -30,7 +31,7 @@
         integrity="sha256-pvPw+upLPUjgMXY0G+8O0xUf+/Im1MZjXxxgOcBQBXU=" crossorigin="anonymous"></script>
         <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
 
-        
+       
         
         {% block extra_css %}
             {# Override this in templates to add extra stylesheets #}

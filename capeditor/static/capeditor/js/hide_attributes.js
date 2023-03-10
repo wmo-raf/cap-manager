@@ -7,18 +7,18 @@ window.addEventListener('DOMContentLoaded', (event) => {
         var optionSelected =  $("option:selected", this)
         var valueSelected  = optionSelected.val();
        
-        if(valueSelected === 'restricted'){
+        if(valueSelected === 'Restricted'){
             $('.restriction').show()
             $('.addresses').hide()
         } 
         
-        if(valueSelected === 'private'){
+        if(valueSelected === 'Private'){
             $('.addresses').show()
             $('.restriction').hide()
 
         }
 
-        if(valueSelected === 'public'){
+        if(valueSelected === 'Public'){
             $('.restriction').hide()
             $('.addresses').hide()
         }
@@ -29,9 +29,9 @@ window.addEventListener('DOMContentLoaded', (event) => {
         var optionSelected =  $("option:selected", this)
         var valueSelected  = optionSelected.val();
 
-        if(valueSelected == 'error'){
+        if(valueSelected == 'Error'){
             $('.note').show()
-        }else if(valueSelected == 'update'){
+        }else if(valueSelected == 'Update'){
             $('.references').show()
         }else{
             $('.note').hide()
