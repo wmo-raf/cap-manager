@@ -178,6 +178,7 @@ class Alert(Page):
             FieldPanel('sender'),
             FieldPanel('sent'),
             ]),
+            FieldPanel('source'),
             
             FieldPanel('status',),
             FieldPanel('message_type', classname="message"),
@@ -210,7 +211,7 @@ class Alert(Page):
 class AlertAddress(Orderable):
     alert = ParentalKey('Alert', related_name="addresses")
     name = models.TextField(help_text="Name of the recipient")
-    address = models.TextField(blank=True, null=True, help_text="Address/Email/Contact")
+    address = models.EmailField(blank=True, null=True, help_text="Email")
 
     def __str__(self):
         return self.name
@@ -223,6 +224,11 @@ class AlertReference(Orderable):
 
     def __str__(self):
         return f'{self.ref_alert.sender},{self.ref_alert.identifier},{self.ref_alert.sent}'
+    
+    @property
+    def reference(self):
+        return f'{self.ref_alert.sender},{self.ref_alert.identifier},{self.ref_alert.sent}'
+
 
 
 class AlertIncident(Orderable):
@@ -377,14 +383,14 @@ class AlertInfo(ClusterableModel):
 
 class AlertResponseType(Orderable):
     RESPONSE_TYPE_CHOICES = (
-        ("shelter", "Shelter - Take shelter in place or per instruction"),
-        ("evacuate", "Evacuate - Relocate as instructed in the instruction"),
-        ("prepare", "Prepare - Relocate as instructed in the instruction"),
-        ("execute", "Execute - Execute a pre-planned activity identified in instruction"),
-        ("avoid", "Avoid - Avoid the subject event as per the instruction"),
-        ("monitor", "Monitor - Attend to information sources as described in instruction"),
-        ("assess", "Assess - Evaluate the information in this message - DONT USE FOR PUBLIC ALERTS"),
-        ("all_clear",
+        ("Shelter", "Shelter - Take shelter in place or per instruction"),
+        ("Evacuate", "Evacuate - Relocate as instructed in the instruction"),
+        ("Prepare", "Prepare - Relocate as instructed in the instruction"),
+        ("Execute", "Execute - Execute a pre-planned activity identified in instruction"),
+        ("Avoid", "Avoid - Avoid the subject event as per the instruction"),
+        ("Monitor", "Monitor - Attend to information sources as described in instruction"),
+        ("Assess", "Assess - Evaluate the information in this message - DONT USE FOR PUBLIC ALERTS"),
+        ("AllClear",
          "All Clear - The subject event no longer poses a threat or concern and any follow on action is described in instruction"),
         ("None", "No action recommended"),
     )
