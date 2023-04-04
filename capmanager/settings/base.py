@@ -53,8 +53,9 @@ INSTALLED_APPS = [
     "django.contrib.gis",
     "rest_framework",
     'rest_framework_xml',
-    "leaflet",
+    # "leaflet",
     'capeditor',
+    "wagtail_lazyimages",
     # 'condensedinlinepanel'
 ]
 
@@ -120,7 +121,7 @@ WSGI_APPLICATION = 'capmanager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'capmanager',
+        'NAME': 'capmanager_db',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
