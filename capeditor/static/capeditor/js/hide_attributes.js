@@ -19,7 +19,6 @@ window.addEventListener('DOMContentLoaded', (event) => {
         $('.addresses').hide()
     }
     
-    console.log("Message type", $('#id_message_type').val())
     // check message 
     if($('#id_message_type').val() === 'Error'){
         $('.note').show()
