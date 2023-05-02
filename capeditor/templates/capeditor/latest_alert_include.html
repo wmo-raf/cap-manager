@@ -8,7 +8,7 @@
         class="alert-area"
         id="area-{{ alert_area.id }}"
         type="hidden"
-        value="{{info.severity}}~{{alert_area.area_desc}}~{{ alert_area.area }}"
+        value="{{info.severity}}~{{alert_area.areaDesc}}~{{ alert_area.area }}"
         />
 
     {% endfor %}
@@ -20,7 +20,7 @@
 
       {% for info in item_info %}
       {% for alert_area in info.alert_areas.values%}
-      <span class="tag is-dark" style="margin:1em 0"> <i class="fa fa-location-pin pr-1"> </i> {{alert_area.area_desc}}</span>
+      <span class="tag is-dark" style="margin:1em 0"> <i class="fa fa-location-pin pr-1"> </i> {{alert_area.areaDesc}}</span>
       {% endfor %}
       {% endfor %}
 
@@ -74,7 +74,7 @@
               <h3 class="title" style="font-size: 20px !important">
                   {% if info.event %}{{info.event}} event{% endif %} 
                   {% if info.area%} at {% for alert_area in info.alert_areas.values%}
-                  {{alert_area.area_desc}}, {% endfor %}{% endif %} 
+                  {{alert_area.areaDesc}}, {% endfor %}{% endif %} 
                   {% if info.onset %}effective on {{info.onset}}{% endif %} {% if info.expires %} and expires on
                   {{info.expires}}{% endif %}
               </h3>
@@ -151,7 +151,7 @@
 {% block extra_js %}
 <script src="https://kit.fontawesome.com/db8ac3c257.js" crossorigin="anonymous"></script>
 <script src="https://cdn.maptiler.com/maplibre-gl-js/v2.4.0/maplibre-gl.js"></script>
-<script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
 <script>
     const latest_map = new maplibregl.Map({
         container: "alert-map", // container ID
