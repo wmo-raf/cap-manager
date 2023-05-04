@@ -56,7 +56,11 @@ INSTALLED_APPS = [
     # "leaflet",
     'capeditor',
     "wagtail_lazyimages",
-    # 'condensedinlinepanel'
+    'django_deep_translator'
+]
+
+LOCALE_PATHS=[
+    'capeditor/locale'
 ]
 
 MIDDLEWARE = [
